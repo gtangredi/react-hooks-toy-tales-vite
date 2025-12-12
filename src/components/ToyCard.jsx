@@ -1,6 +1,8 @@
-import React from "react";
+import { useState } from "react";
 
 function ToyCard({ toy, setToys, toys }) {
+  const [likes, setLikes] = useState(toy.likes);
+
   function handleDonate() {
     fetch(`http://localhost:3001/toys/${toy.id}`, {
       method: "DELETE"
@@ -13,6 +15,22 @@ function ToyCard({ toy, setToys, toys }) {
     .catch((error) => console.error("Error deleting toy:", error));
   }
 
+  function handleLike() {
+    const updatedLikes = likes + 1;
+    fetch(`http://localhost:3001/toys/${toy.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ likes: updatedLikes })
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      setLikes(data.likes);
+    })
+    .catch((error) => console.error("Error updating likes:", error));
+  }
+
   return (
     <div className="card" data-testid="toy-card">
       <h2>{ toy.name }</h2>
@@ -21,8 +39,8 @@ function ToyCard({ toy, setToys, toys }) {
         alt={ toy.name }
         className="toy-avatar"
       />
-      <p>{ toy.likes } Likes </p>
-      <button className="like-btn">Like {"<3"}</button>
+      <p>{ likes } Likes </p>
+      <button className="like-btn" onClick={handleLike}>Like {"<3"}</button>
       <button className="del-btn" onClick={handleDonate}>Donate to GoodWill</button>
     </div>
   );
